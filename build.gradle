@@ -1,0 +1,65 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id "org.jlleitschuh.gradle.ktlint" version "8.2.0"
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'maven'
+
+group 'ca.wikinet'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+    maven { url 'https://kotlin.bintray.com/ktor' }
+    maven { url 'https://kotlin.bintray.com/kotlinx' }
+}
+
+apply plugin: 'maven-publish'
+
+dependencies {
+    implementation "io.opencensus:opencensus-api:$opencensus_version"
+    implementation "io.opencensus:opencensus-contrib-http-util:$opencensus_version"
+    implementation "io.opencensus:opencensus-impl:$opencensus_version"
+    implementation "io.ktor:ktor-server-core:$ktor_version"
+    implementation "io.ktor:ktor-auth:$ktor_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+publishing {
+    repositories {
+        mavenCentral()
+    }
+    publications {
+        opencensus_ktor(MavenPublication) {
+            from components.java
+            groupId group
+            artifactId name
+            artifact sourcesJar
+            version project.version
+        }
+    }
+}
